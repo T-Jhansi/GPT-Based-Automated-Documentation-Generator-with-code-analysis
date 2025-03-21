@@ -2,3 +2,4 @@ streamlit
 ollama
 fpdf
 docx
+requests
