@@ -1,4 +1,4 @@
 streamlit
-pip install ollama
-pip install fpdf
-pip install docx
+ollama
+fpdf
+docx
