@@ -1,3 +1,16 @@
+import os
+import openai  # If using OpenAI
+import streamlit as st
+
+# 🔑 Load API Key securely (Replace with DeepSeek if using it)
+OPENAI_API_KEY = st.secrets.get("OPENAI_API_KEY") or os.getenv("OPENAI_API_KEY")
+
+# Ensure API Key is set
+if not OPENAI_API_KEY:
+    st.error("❌ API Key not found! Set 'OPENAI_API_KEY' in Streamlit secrets or environment variables.")
+else:
+    openai.api_key = OPENAI_API_KEY
+
 from git_integration import GitManager
 from collaboration import CollaborationManager
 from api_docs import APIDocumentationGenerator
