@@ -2,8 +2,5 @@ streamlit
 openai
 fpdf
 python-docx
-openai>=1.0.0
-streamlit
-# ... other dependencies
 
 
