@@ -2,7 +2,8 @@ import os
 import logging
 import streamlit as st
 from typing import Dict, Any
-from openai import OpenAI, OpenAIError, RateLimitError, AuthenticationError
+from openai._exceptions import OpenAIError, RateLimitError, AuthenticationError
+
 
 
 # Set up logging
