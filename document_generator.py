@@ -1,9 +1,10 @@
 import openai
-import openai.error
 import os
 import logging
 import streamlit as st
 from typing import Dict, Any
+from openai import AuthenticationError, RateLimitError, OpenAIError
+
 
 # Set up logging
 logger = logging.getLogger(__name__)
