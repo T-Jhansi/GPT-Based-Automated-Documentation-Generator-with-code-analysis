@@ -1,10 +1,10 @@
 import os
 import logging
 import streamlit as st
+import openai
 from typing import Dict, Any
-from openai._exceptions import OpenAIError, RateLimitError, AuthenticationError
-
-
+from openai import OpenAI
+from openai._exceptions import OpenAIError, AuthenticationError, RateLimitError
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -17,18 +17,18 @@ class DocumentGenerator:
         if not self.api_key:
             raise ValueError("❌ API Key is missing! Set 'OPENAI_API_KEY' in Streamlit secrets or environment variables.")
 
-        self.client = OpenAI(api_key=self.api_key)  # ✅ Modern client usage
+        # ✅ Initialize OpenAI client instance (required in v1+)
+        self.client = OpenAI(api_key=self.api_key)
 
     def generate_documentation(self, code: str, analysis: Dict[str, Any]) -> str:
         """Generate comprehensive documentation using OpenAI's GPT model."""
         try:
             prompt = self._create_prompt(code, analysis)
 
+            # ✅ Use the new API pattern (v1.0+)
             response = self.client.chat.completions.create(
                 model=self.model_name,
-                messages=[
-                    {"role": "user", "content": prompt}
-                ]
+                messages=[{"role": "user", "content": prompt}]
             )
 
             return response.choices[0].message.content
@@ -41,8 +41,8 @@ class DocumentGenerator:
             logger.error(f"OpenAI API error: {str(e)}", exc_info=True)
             return f"❌ OpenAI API error: {str(e)}"
         except Exception as e:
-            logger.error(f"Unexpected error generating documentation: {str(e)}", exc_info=True)
-            return "❌ Unexpected error generating documentation. Please try again."
+            logger.error(f"Error generating documentation: {str(e)}", exc_info=True)
+            return "❌ Error generating documentation. Please try again."
 
     def _create_prompt(self, code: str, analysis: Dict[str, Any]) -> str:
         """Creates a structured prompt for AI documentation."""
