@@ -1,4 +1,5 @@
 import openai
+import openai.error
 import os
 import logging
 import streamlit as st
