@@ -1,7 +1,12 @@
-streamlit
-openai
-fpdf
-python-docx
+
+# Core App Framework
+streamlit>=1.30.0
+
+# OpenAI SDK (new version with correct interface)
 openai>=1.3.7,<2.0.0
-streamlit
+
+# Export Formats
+fpdf>=1.7.2
+python-docx>=0.8.11
+
 
