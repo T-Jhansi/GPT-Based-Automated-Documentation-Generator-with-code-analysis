@@ -8,6 +8,7 @@ from openai._exceptions import OpenAIError, AuthenticationError, RateLimitError
 
 # Set up logging
 logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
 
 class DocumentGenerator:
     def __init__(self, model_name: str = "gpt-3.5-turbo"):
@@ -17,21 +18,23 @@ class DocumentGenerator:
         if not self.api_key:
             raise ValueError("❌ API Key is missing! Set 'OPENAI_API_KEY' in Streamlit secrets or environment variables.")
 
-        # ✅ Initialize OpenAI client instance (required in v1+)
-        self.client = OpenAI(api_key=self.api_key)
+        # ✅ Correct client initialization
+        self.client = openai.OpenAI(api_key=self.api_key)
 
     def generate_documentation(self, code: str, analysis: Dict[str, Any]) -> str:
         """Generate comprehensive documentation using OpenAI's GPT model."""
         try:
             prompt = self._create_prompt(code, analysis)
 
-            # ✅ Use the new API pattern (v1.0+)
             response = self.client.chat.completions.create(
                 model=self.model_name,
-                messages=[{"role": "user", "content": prompt}]
+                messages=[
+                    {"role": "system", "content": "You are a professional Python documentation writer."},
+                    {"role": "user", "content": prompt}
+                ]
             )
 
-            return response.choices[0].message.content
+            return response.choices[0].message.content.strip()
 
         except AuthenticationError:
             return "❌ Invalid API key! Check your OpenAI API key."
@@ -51,15 +54,19 @@ class DocumentGenerator:
         dependencies = ', '.join(analysis.get('relationships', {}).get('imports', []) or ["None"])
 
         return f"""
-        Generate comprehensive documentation for the following Python code.
-        
-        Overview:
-        - Functions: {functions}
-        - Classes: {classes}
-        - Dependencies: {dependencies}
-        
-        Code:
-        {code}
+Please generate high-quality, well-formatted Python documentation for the following code snippet.
 
-        Provide structured documentation with examples.
+Overview:
+- Functions: {functions}
+- Classes: {classes}
+- Dependencies: {dependencies}
+
+Code:
+{code}
+
+Instructions:
+- Start with a short summary of what this script/module does.
+- Add docstrings where missing.
+- Include usage examples.
+- Use Markdown formatting where relevant.
         """
