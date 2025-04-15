@@ -1,47 +1,42 @@
-# document_generator.py
-import ollama
-from typing import Dict, Any
-import logging
-
-logger = logging.getLogger(__name__)
+import time
 
 class DocumentGenerator:
-    def __init__(self, model_name: str = 'deepseek-r1:1.5b'):
-        self.model_name = model_name
-    
+    # ... (other methods remain unchanged)
+
     def generate_documentation(self, code: str, analysis: Dict[str, Any]) -> str:
-        """
-        Generate comprehensive documentation using the LLM model.
-        
-        Args:
-            code (str): Source code
-            analysis (Dict): Code analysis results
-            
-        Returns:
-            str: Generated documentation
-        """
-        try:
-            prompt = self._create_prompt(code, analysis)
-            response = ollama.chat(
-                model=self.model_name,
-                messages=[{"role": "user", "content": prompt}]
-            )
-            return response['message']['content']
-        except Exception as e:
-            logger.error(f"Error generating documentation: {str(e)}")
-            return "Error generating documentation. Please try again."
-    
-    def _create_prompt(self, code: str, analysis: Dict[str, Any]) -> str:
-        return f"""
-        Generate comprehensive documentation for the following Python code.
-        Include:
-        - Overview
-        - Functions: {', '.join(analysis.get('functions', []))}
-        - Classes: {', '.join(analysis.get('classes', []))}
-        - Dependencies: {', '.join(analysis.get('relationships', {}).get('imports', []))}
-        
-        Code:
-        {code}
-        
-        Please provide detailed documentation with examples and usage patterns.
-        """
+        """Generate comprehensive documentation using OpenAI's GPT model."""
+        max_retries = 5
+        retry_delay = 1  # Start with a 1 second delay
+
+        for attempt in range(max_retries):
+            try:
+                prompt = self._create_prompt(code, analysis)
+
+                response = openai.ChatCompletion.create(
+                    model=self.model_name,
+                    messages=[
+                        {"role": "system", "content": "You are a professional Python documentation writer."},
+                        {"role": "user", "content": prompt}
+                    ]
+                )
+
+                if response.choices:
+                    return response.choices[0].message.content.strip()
+                else:
+                    return "❌ No response from OpenAI API."
+
+            except AuthenticationError:
+                return "❌ Invalid API key! Check your OpenAI API key."
+            except RateLimitError:
+                if attempt < max_retries - 1:  # Don't wait on the last attempt
+                    wait_time = retry_delay * (2 ** attempt)  # Exponential backoff
+                    logger.warning(f"Rate limit exceeded. Retrying in {wait_time} seconds...")
+                    time.sleep(wait_time)
+                else:
+                    return "❌ Rate limit exceeded! Please try again later."
+            except OpenAIError as e:
+                logger.error(f"OpenAI API error: {str(e)}", exc_info=True)
+                return f"❌ OpenAI API error: {str(e)}"
+            except Exception as e:
+                logger.error(f"Unexpected error: {type(e).__name__} - {str(e)}", exc_info=True)
+                return "❌ Error generating documentation. Please try again."
