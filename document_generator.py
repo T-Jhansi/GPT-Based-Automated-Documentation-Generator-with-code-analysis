@@ -2,21 +2,21 @@
 
 import os
 from typing import Dict, Any
-import openai
-from openai._exceptions import AuthenticationError, RateLimitError, OpenAIError  # updated import path
+from openai import OpenAI
+from openai._exceptions import AuthenticationError, RateLimitError, OpenAIError
 
 class DocumentGenerator:
     def __init__(self):
         api_key = os.getenv("OPENAI_API_KEY")
         if not api_key:
             raise ValueError("Missing OpenAI API key. Set it as the OPENAI_API_KEY environment variable.")
-        openai.api_key = api_key
+        self.client = OpenAI(api_key=api_key)
 
     def generate_documentation(self, code: str, analysis: Dict[str, Any]) -> str:
-        prompt = f"Generate technical documentation for the following Python code:\n\n{code}\n\nAnalysis:\n{analysis}"
+        prompt = f"Generate detailed technical documentation for the following code:\n\n{code}\n\nAnalysis:\n{analysis}"
 
         try:
-            response = openai.ChatCompletion.create(
+            response = self.client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 messages=[{"role": "user", "content": prompt}],
                 temperature=0.7,
