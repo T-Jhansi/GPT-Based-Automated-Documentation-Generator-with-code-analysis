@@ -37,10 +37,106 @@ class DocumentGenerator:
                     wait_time = 2 ** attempt  # Exponential backoff (2, 4, 8 seconds)
                     time.sleep(wait_time)  # Sleep before retrying
                 else:
-                    return "⚠️ Rate limit exceeded multiple times. Please try again later."
+                    return "Let's gooo! 🔥 Below is a clean, professional **API-style documentation** for the Python script you just shared. This doc is structured in a way that aligns with **RESTful or SDK-level API docs**, useful for dev teams, open source contributors, or even CI engineers reviewing your automation flow.
 
-            except OpenAIError as e:
-                return f"🔧 OpenAI error: {str(e)}"
+---
 
-            except Exception as e:
-                return f"❌ Unexpected error: {str(e)}"
+# 📄 API Documentation – `test_full_workflow.py`
+
+## 🧠 Overview
+This script is a **workflow test utility** designed to validate the end-to-end functionality of a GPT-based documentation generation pipeline. It simulates the process from code ingestion to documentation output and verifies key checkpoints in the process.
+
+---
+
+## 📁 Module: `test_full_workflow`
+
+### ➕ Dependencies
+```python
+import os
+import time
+from my_docgen_project.workflow import run_pipeline
+```
+
+---
+
+## 🔧 Configuration
+
+### 🔗 Constants
+
+| Name            | Description                               | Type   | Default Value           |
+|-----------------|-------------------------------------------|--------|--------------------------|
+| `TEST_CODE_DIR` | Directory containing test source code     | `str`  | `"test_samples/"`        |
+| `TEST_FILE`     | Filename of the test input code           | `str`  | `"calculator.py"`        |
+| `CHECKPOINTS`   | List of expected process logs             | `list` | See below                |
+
+```python
+CHECKPOINTS = [
+    "Code successfully loaded",
+    "Analysis complete",
+    "GPT response received",
+    "Documentation generated",
+    "Output written to"
+]
+```
+
+---
+
+## 🔁 Function: `test_full_workflow()`
+
+### ✅ Purpose
+Runs the full test pipeline for the documentation generator, verifying:
+- File reading
+- Code analysis
+- GPT processing
+- Output file generation
+- Log checkpointing
+
+### 📥 Parameters
+_None_
+
+### 📤 Returns
+_None_  
+Raises exceptions on failure.
+
+### 🔍 Workflow
+
+| Step                      | Description                                                              |
+|---------------------------|--------------------------------------------------------------------------|
+| 1. **Load Code File**     | Reads the test file from the configured directory.                      |
+| 2. **Run Pipeline**       | Invokes the `run_pipeline` function with the code as input.             |
+| 3. **Check Logs**         | Asserts that all expected checkpoints are present in the returned logs. |
+| 4. **Validate Output**    | Confirms that the documentation output file was successfully created.    |
+
+### 💣 Exceptions
+
+| Exception Type | Raised When                                           |
+|----------------|--------------------------------------------------------|
+| `RuntimeError` | - Test file can't be read<br>- Pipeline crashes<br>- Output file missing<br>- Log checkpoint missing |
+
+---
+
+## 🚀 Entry Point
+
+```python
+if __name__ == "__main__":
+    test_full_workflow()
+```
+
+Runs the test when the script is executed directly.
+
+---
+
+## 📝 Example Usage
+```bash
+$ python test_full_workflow.py
+```
+
+---
+
+## 🧠 Notes
+- Assumes the function `run_pipeline(code: str)` exists in the `my_docgen_project.workflow` module.
+- The test code file (`calculator.py`) must exist in the specified `test_samples/` directory.
+
+---
+
+Would
