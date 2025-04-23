@@ -1,8 +1,10 @@
+# document_generator.py
+
 import os
 import time
 from typing import Dict, Any
 import openai
-from openai._exceptions import AuthenticationError, RateLimitError, OpenAIError
+from openai.error import AuthenticationError, RateLimitError, OpenAIError
 
 class DocumentGenerator:
     def __init__(self):
@@ -17,13 +19,14 @@ class DocumentGenerator:
         attempt = 0
         while attempt < 3:  # Retry up to 3 times
             try:
-                response = openai.ChatCompletion.create(
+                # Using the new method for generating completions in SDK v1.x
+                response = openai.Completion.create(
                     model="gpt-3.5-turbo",
-                    messages=[{"role": "user", "content": prompt}],
+                    prompt=prompt,
                     temperature=0.7,
                     max_tokens=1024
                 )
-                return response.choices[0].message.content.strip()
+                return response.choices[0].text.strip()
 
             except AuthenticationError:
                 return "🛑 Invalid OpenAI API key. Please check your credentials."
