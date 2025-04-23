@@ -1,4 +1,6 @@
 import time
+from typing import Dict, Any
+
 
 class DocumentGenerator:
     # ... (other methods remain unchanged)
