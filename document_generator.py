@@ -1,45 +1,40 @@
-import time
-from typing import Dict, Any
-from openai.error import AuthenticationError
+# document_generator.py
 
+import os
+from typing import Dict, Any
+import openai
+from openai.error import AuthenticationError, RateLimitError, OpenAIError
 
 class DocumentGenerator:
-    # ... (other methods remain unchanged)
+    def __init__(self):
+        # Set API key from environment variable
+        self.api_key = os.getenv("OPENAI_API_KEY")
+        if not self.api_key:
+            raise ValueError("Missing OpenAI API key. Set OPENAI_API_KEY as an environment variable.")
+        openai.api_key = self.api_key
 
     def generate_documentation(self, code: str, analysis: Dict[str, Any]) -> str:
-        """Generate comprehensive documentation using OpenAI's GPT model."""
-        max_retries = 5
-        retry_delay = 1  # Start with a 1 second delay
+        prompt = f"Generate high-quality technical documentation for the following code:\n\n{code}\n\nCode analysis:\n{analysis}"
 
-        for attempt in range(max_retries):
-            try:
-                prompt = self._create_prompt(code, analysis)
+        try:
+            response = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=0.7,
+                max_tokens=1024
+            )
+            return response.choices[0].message.content.strip()
 
-                response = openai.ChatCompletion.create(
-                    model=self.model_name,
-                    messages=[
-                        {"role": "system", "content": "You are a professional Python documentation writer."},
-                        {"role": "user", "content": prompt}
-                    ]
-                )
+        except AuthenticationError:
+            return "🛑 Authentication failed. Please verify your OpenAI API key."
 
-                if response.choices:
-                    return response.choices[0].message.content.strip()
-                else:
-                    return "❌ No response from OpenAI API."
+        except RateLimitError:
+            return "⏳ Rate limit hit. Try again later."
 
-            except AuthenticationError:
-                return "❌ Invalid API key! Check your OpenAI API key."
-            except RateLimitError:
-                if attempt < max_retries - 1:  # Don't wait on the last attempt
-                    wait_time = retry_delay * (2 ** attempt)  # Exponential backoff
-                    logger.warning(f"Rate limit exceeded. Retrying in {wait_time} seconds...")
-                    time.sleep(wait_time)
-                else:
-                    return "❌ Rate limit exceeded! Please try again later."
-            except OpenAIError as e:
-                logger.error(f"OpenAI API error: {str(e)}", exc_info=True)
-                return f"❌ OpenAI API error: {str(e)}"
-            except Exception as e:
-                logger.error(f"Unexpected error: {type(e).__name__} - {str(e)}", exc_info=True)
-                return "❌ Error generating documentation. Please try again."
+        except OpenAIError as e:
+            return f"⚠️ OpenAI API error: {str(e)}"
+
+        except Exception as e:
+            return f"🚨 Unexpected error: {str(e)}"
