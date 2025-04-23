@@ -1,5 +1,6 @@
 import time
 from typing import Dict, Any
+from openai.error import AuthenticationError
 
 
 class DocumentGenerator:
